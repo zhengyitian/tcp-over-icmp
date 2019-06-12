@@ -36,7 +36,7 @@ so = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
 def sendOne(add,pacId):
     dest_addr  =  socket.gethostbyname(add)
     my_checksum = 0
-    ID =  pacId
+    ID =  100 & 0xFFFF
     header = struct.pack("bbHHh", 8, 0, my_checksum, ID, 1)
     da = 190 * 'a'
     da2 = my_decry(da)
