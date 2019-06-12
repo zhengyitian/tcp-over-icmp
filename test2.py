@@ -63,7 +63,7 @@ def rec():
         "bbHHh", icmpHeader
     )
     if packetID != 100 & 0xFFFF :
-        print 'wrong_1 '
+        print 'wrong_1 ',packetID
         return
     if len(recPacket) <28+192:
         print('len_wrong')
