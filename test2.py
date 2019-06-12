@@ -1,7 +1,11 @@
 import os, sys, socket, struct, select, time
 
-ICMP_ECHO_REQUEST = 0 # Seems to be the same on Solaris.
+ICMP_ECHO_REQUEST = 8 # Seems to be the same on Solaris.
 #ICMP_ECHO_REQUEST = 8 # Seems to be the same on Solaris.
+def my_decry(da):
+    r = (ord(da[1])+17)/13+(ord(da[3])+19)/17+(ord(da[9])+23)/19+(ord(da[10])+17)/13+(ord(da[30])+19)/17+(ord(da[90])+23)/19
+    r2 = (ord(da[11])+17)/13+(ord(da[31])+19)/17+(ord(da[91])+23)/19+(ord(da[12])+17)/13+(ord(da[32])+19)/17+(ord(da[92])+23)/19
+    return chr(r %251)+chr(r2 % 249)
 
 def checksum(source_string):
     sum = 0
@@ -25,9 +29,25 @@ def checksum(source_string):
     return answer
 
 import binascii
-
+dest_addr2 = '144.202.17.72'
 icmp = socket.getprotobyname("icmp")
 so = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
+def sendOne():
+    dest_addr  =  socket.gethostbyname(dest_addr2)
+    my_checksum = 0
+    ID =  100 & 0xFFFF
+    header = struct.pack("bbHHh", 8, 0, my_checksum, ID, 1)
+    bytesInDouble = struct.calcsize("d")
+    data = (192 - bytesInDouble) * "Q"
+    data = struct.pack("d", time.time()) + data
+    my_checksum = checksum(header + data)
+
+    header = struct.pack(
+        "bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), ID, 1
+    )
+    packet = header + data
+    so.sendto(packet, (dest_addr, 1)) # Don't know about the 1
+
 def rec():
     whatReady = select.select([so], [], [], 4)
     if whatReady[0] == []: # Timeout
@@ -36,6 +56,20 @@ def rec():
     rp, addr = so.recvfrom(1024)
     recPacket = rp
     print recPacket,addr
+    if ord(rp[9])!=1 :
+        return    
+    icmpHeader = recPacket[20:28]
+    type, code, checksum, packetID, sequence = struct.unpack(
+        "bbHHh", icmpHeader
+    )
+    if packetID != 100 & 0xFFFF :
+        return
+    if len(recPacket) <28+192:
+        return
+    s = recPacket[28:28+192]
+    if my_decry(s[:190]) != s[-2:]:
+        return
+    
     if ord(rp[9])!=1 or ord(rp[20])!=8:
         return
 
@@ -46,6 +80,7 @@ def rec():
         co += 1
         s += str(ord(i))+','
     return
+
 while True:
     rec()
 
@@ -67,7 +102,7 @@ def receive_one_ping(my_socket, ID, timeout):
             co += 1
             s += str(ord(i))+','
         return
-    
+
         if 'QQQ' in recPacket:
             i9 = 9
             print recPacket
@@ -94,7 +129,6 @@ def receive_one_ping(my_socket, ID, timeout):
 
 def send_one_ping(my_socket, dest_addr, ID):
     dest_addr  =  socket.gethostbyname(dest_addr)
-
     my_checksum = 0
 
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, my_checksum, ID, 1)
@@ -109,7 +143,7 @@ def send_one_ping(my_socket, dest_addr, ID):
     )
     packet = header + data
     #for i in packet:
-        
+
         #print ord(i)
     my_socket.sendto(packet, (dest_addr, 1)) # Don't know about the 1
 
@@ -160,7 +194,7 @@ def dodo(a):
     while True:
         t = do_one(a,2)
         print(t)
-        
+
 def do_one2(dest_addr, timeout):
     icmp = socket.getprotobyname("icmp")
     try:
@@ -178,11 +212,11 @@ def do_one2(dest_addr, timeout):
     while True:
         delay = receive_one_ping(my_socket, my_ID, timeout)
         print delay
-        
+
     my_socket.close()
     return delay
 
-    
+
 if __name__ == '__main__':
     do_one2("192.168.2.2", 20)
     #verbose_ping("heise.de")
