@@ -63,14 +63,18 @@ def rec():
         "bbHHh", icmpHeader
     )
     if packetID != 100 & 0xFFFF :
+        print 'wrong_1 '
         return
     if len(recPacket) <28+192:
+        print('len_wrong')
         return
     s = recPacket[28:28+192]
     if my_decry(s[:190]) != s[-2:]:
+        print('decry_wrong')
         return
     
     if ord(rp[9])!=1 or ord(rp[20])!=8:
+        print('not_ 8')
         return
 
     s = ''
