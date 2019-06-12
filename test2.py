@@ -45,7 +45,7 @@ def sendOne(add,pacId,seq):
     my_checksum = checksum(header + data)
 
     header = struct.pack(
-        "bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), ID, 1
+        "bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), ID, seq
     )
     packet = header + data
     so.sendto(packet, (dest_addr, 1)) # Don't know about the 1
@@ -76,8 +76,8 @@ def rec():
         print('decry_wrong')
         return
     
-    if ord(rp[9])!=1 or ord(rp[20])!=0:
-        print('not_ 0')
+    if ord(rp[9])!=1 or ord(rp[20])!=8:
+        print('not_ 8')
         return
 
     s = ''
