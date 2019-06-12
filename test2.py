@@ -1,6 +1,6 @@
 import os, sys, socket, struct, select, time
 
-ICMP_ECHO_REQUEST = 8 # Seems to be the same on Solaris.
+ICMP_ECHO_REQUEST = 0 # Seems to be the same on Solaris.
 #ICMP_ECHO_REQUEST = 8 # Seems to be the same on Solaris.
 def my_decry(da):
     r = (ord(da[1])+17)/13+(ord(da[3])+19)/17+(ord(da[9])+23)/19+(ord(da[10])+17)/13+(ord(da[30])+19)/17+(ord(da[90])+23)/19
@@ -32,14 +32,16 @@ import binascii
 dest_addr2 = '144.202.17.72'
 icmp = socket.getprotobyname("icmp")
 so = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
-def sendOne():
-    dest_addr  =  socket.gethostbyname(dest_addr2)
+
+def sendOne(add,pacId):
+    dest_addr  =  socket.gethostbyname(add)
     my_checksum = 0
-    ID =  100 & 0xFFFF
+    ID =  pacId
     header = struct.pack("bbHHh", 8, 0, my_checksum, ID, 1)
-    bytesInDouble = struct.calcsize("d")
-    data = (192 - bytesInDouble) * "Q"
-    data = struct.pack("d", time.time()) + data
+    da = 190 * 'a'
+    da2 = my_decry(da)
+    data = da+da2
+ 
     my_checksum = checksum(header + data)
 
     header = struct.pack(
@@ -47,6 +49,7 @@ def sendOne():
     )
     packet = header + data
     so.sendto(packet, (dest_addr, 1)) # Don't know about the 1
+
 
 def rec():
     whatReady = select.select([so], [], [], 4)
@@ -83,6 +86,7 @@ def rec():
         if co <30 : print co,':',ord(i)
         co += 1
         s += str(ord(i))+','
+    sendOne(addr[0],packetID)
     return
 
 while True:
