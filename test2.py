@@ -37,7 +37,7 @@ def sendOne(add,pacId,seq):
     dest_addr  =  socket.gethostbyname(add)
     my_checksum = 0
     ID =  pacId
-    header = struct.pack("bbHHh", 0, 0, my_checksum, ID, seq)
+    header = struct.pack("bbHHh", 0, 0, my_checksum, ID, 1)
     da = 190 * 'a'
     da2 = my_decry(da)
     data = da+da2
@@ -45,7 +45,7 @@ def sendOne(add,pacId,seq):
     my_checksum = checksum(header + data)
 
     header = struct.pack(
-        "bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), ID, seq
+        "bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), ID, 1
     )
     packet = header + data
     so.sendto(packet, (dest_addr, 1)) # Don't know about the 1
