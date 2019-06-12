@@ -33,11 +33,11 @@ dest_addr2 = '144.202.17.72'
 icmp = socket.getprotobyname("icmp")
 so = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
 
-def sendOne(add,pacId):
+def sendOne(add,pacId,seq):
     dest_addr  =  socket.gethostbyname(add)
     my_checksum = 0
-    ID =  100 & 0xFFFF
-    header = struct.pack("bbHHh", 8, 0, my_checksum, ID, 1)
+    ID =  pacId
+    header = struct.pack("bbHHh", 0, 0, my_checksum, ID, seq)
     da = 190 * 'a'
     da2 = my_decry(da)
     data = da+da2
@@ -76,8 +76,8 @@ def rec():
         print('decry_wrong')
         return
     
-    if ord(rp[9])!=1 or ord(rp[20])!=8:
-        print('not_ 8')
+    if ord(rp[9])!=1 or ord(rp[20])!=0:
+        print('not_ 0')
         return
 
     s = ''
@@ -86,7 +86,9 @@ def rec():
         if co <30 : print co,':',ord(i)
         co += 1
         s += str(ord(i))+','
-    sendOne(addr[0],packetID)
+    sendOne(addr[0],packetID,sequence)
+    sendOne(addr[0],packetID,sequence)
+    sendOne(addr[0],packetID,sequence)
     return
 
 while True:
