@@ -3,7 +3,7 @@
 
 import os, sys, socket, struct, select, time
 
-ICMP_ECHO_REQUEST = 0 # Seems to be the same on Solaris.
+ICMP_ECHO_REQUEST = 8 # Seems to be the same on Solaris.
 
 def checksum(source_string):
     sum = 0
@@ -93,11 +93,11 @@ def do_one(dest_addr, timeout):
         send_one_ping(my_socket, dest_addr, my_ID)
     except:
         print("error")
-    delay = time.time() 
-    #delay = receive_one_ping(my_socket, my_ID, timeout)
+
+    delay = receive_one_ping(my_socket, my_ID, timeout)
 
     my_socket.close()
-    #return delay
+    return delay
 
 
 def verbose_ping(dest_addr, timeout = 2, count = 4):
@@ -122,8 +122,5 @@ def dodo(a):
         print(t)
 if __name__ == '__main__':
 
-    #verbose_ping("heise.de")
-    #verbose_ping("baidu.com")
-    dodo("115.183.18.154")
-    #verbose_ping("a-test-url-taht-is-not-available.com")
-    verbose_ping("192.168.199.1")
+    verbose_ping("154.92.15.210")
+ 
