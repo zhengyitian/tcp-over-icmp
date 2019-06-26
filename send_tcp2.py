@@ -39,10 +39,9 @@ daddr = socket.inet_aton ( dest_ip )
  
 ihl_version = (version << 4) + ihl
  
-# the ! in the pack format string means network order
 ip_header = pack('!BBHHHBBH4s4s' , ihl_version, tos, tot_len, id, frag_off, ttl, protocol, check, saddr, daddr)
  
-# tcp header fields
+
 source = 1234   # source port
 dest = 80   # destination port
 seq = 7765
@@ -53,7 +52,7 @@ fin = 0
 syn = 1
 rst = 0
 psh = 0
-ack = 1
+ack = 0
 urg = 0
 window = socket.htons (5840)    #   maximum allowed window size
 check = 0
@@ -73,7 +72,7 @@ protocol = socket.IPPROTO_TCP
 tcp_length = len(tcp_header)
  
 psh = pack('!4s4sBBH' , source_address , dest_address , placeholder , protocol , tcp_length);
-psh = psh + tcp_header+chr(99)*100;
+psh = psh + tcp_header;
  
 tcp_checksum = checksum(psh)
  
@@ -81,7 +80,7 @@ tcp_checksum = checksum(psh)
 tcp_header = pack('!HHLLBBHHH' , source, dest, seq, ack_seq, offset_res, tcp_flags,  window, tcp_checksum , urg_ptr)
  
 # final full packet - syn packets dont have any data
-packet = ip_header + tcp_header+chr(99)*100
+packet = ip_header + tcp_header
  
 #Send the packet finally - the port specified has no effect
 s.sendto(packet, (dest_ip , 0 ))    # put this in a loop if you want to flood the target

